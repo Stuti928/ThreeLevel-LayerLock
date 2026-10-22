@@ -1,0 +1,197 @@
+{% extends "base.html" %}
+{% block title %}Create Account — LayerLock{% endblock %}
+
+{% block content %}
+<div class="card">
+
+  <span class="step-badge">New Account</span>
+  <h1 class="page-title">Create an account</h1>
+  <p class="page-subtitle">Set up all three authentication credentials below.</p>
+
+  {% if messages %}
+    {% for message in messages %}
+      <div class="alert alert-success" role="alert">
+        <span class="alert-icon">✓</span>
+        <span>{{ message }}</span>
+      </div>
+    {% endfor %}
+  {% endif %}
+
+  <form method="POST" enctype="multipart/form-data" novalidate>
+    {% csrf_token %}
+
+    <!-- ── Level 1: Identity ─────────────────────────────────────────── -->
+    <p class="section-label">Identity</p>
+
+    <div class="form-group">
+      <label for="username">Username</label>
+      <input
+        type="text" id="username" name="username"
+        value="{{ values.username|default:'' }}"
+        autocomplete="username" required
+        placeholder="Your display name"
+        aria-describedby="{% if errors.username %}err-username{% endif %}"
+      >
+      {% if errors.username %}
+        <p class="field-error" id="err-username">&#x26A0; {{ errors.username }}</p>
+      {% endif %}
+    </div>
+
+    <div class="form-group">
+      <label for="email">Email address</label>
+      <input
+        type="email" id="email" name="email"
+        value="{{ values.email|default:'' }}"
+        autocomplete="email" required
+        placeholder="you@example.com"
+        aria-describedby="{% if errors.email %}err-email{% endif %}"
+      >
+      {% if errors.email %}
+        <p class="field-error" id="err-email">&#x26A0; {{ errors.email }}</p>
+      {% endif %}
+    </div>
+
+    <!-- ── Level 1: Password ─────────────────────────────────────────── -->
+    <p class="section-label">Level 1 — Password</p>
+
+    <div class="form-group">
+      <label for="password">Password</label>
+      <div class="input-wrap">
+        <input
+          type="password" id="password" name="password"
+          autocomplete="new-password" required
+          placeholder="Choose a strong password"
+          style="padding-right:44px"
+          aria-describedby="{% if errors.password %}err-password{% endif %}"
+        >
+        <button type="button" class="pw-toggle" aria-label="Toggle password visibility" data-target="password">&#x1F441;</button>
+      </div>
+      {% if errors.password %}
+        <p class="field-error" id="err-password">&#x26A0; {{ errors.password }}</p>
+      {% endif %}
+    </div>
+
+    <hr class="divider">
+
+    <!-- ── Level 2: RGB Password ─────────────────────────────────────── -->
+    <p class="section-label">Level 2 — RGB Secret</p>
+
+    <div class="rgb-hint-bar" aria-hidden="true"></div>
+
+    <div class="form-group">
+      <label for="rgb_password">RGB Password</label>
+      <input
+        type="text" id="rgb_password" name="rgb_password"
+        value="{{ values.rgb_password|default:'' }}"
+        autocomplete="off"
+        placeholder="e.g. 255,0,128, #FF0080, or purple"
+        aria-describedby="rgb-hint {% if errors.rgb_password %}err-rgb{% endif %}"
+        required
+      >
+      <p id="rgb-hint" class="field-hint">
+        Enter a valid RGB value (e.g. 255,0,128), hexadecimal colour (e.g. #FF0080), or recognised colour name (e.g. purple).
+      </p>
+      {% if errors.rgb_password %}
+        <p class="field-error" id="err-rgb">&#x26A0; {{ errors.rgb_password }}</p>
+      {% endif %}
+    </div>
+
+    <hr class="divider">
+
+    <!-- ── Level 3: Image Password ───────────────────────────────────── -->
+    <p class="section-label">Level 3 — Image Key</p>
+
+    <div class="form-group">
+      <label for="image_password">Upload your image key</label>
+
+      <div class="drop-zone" id="reg-drop-zone">
+        <input
+          type="file" id="image_password" name="image_password"
+          accept="image/*" required
+          aria-describedby="img-hint {% if errors.image_password %}err-img{% endif %}"
+        >
+        <span class="drop-zone-icon" aria-hidden="true">&#x1F5BC;</span>
+        <p class="drop-zone-text">Drag &amp; drop an image here</p>
+        <p class="drop-zone-sub">or</p>
+        <span class="drop-zone-btn">Choose Image</span>
+      </div>
+
+      <p id="img-hint" class="field-hint">
+        JPEG, PNG, GIF, WebP, BMP &bull; max 5 MB &bull; you must re-upload the <em>same</em> image to authenticate.
+      </p>
+
+      {% if errors.image_password %}
+        <p class="field-error" id="err-img">&#x26A0; {{ errors.image_password }}</p>
+      {% endif %}
+
+      <!-- Rich image preview -->
+      <div id="preview-container" class="preview-container" aria-hidden="true">
+        <div class="preview-inner">
+          <img id="preview-img" class="preview-img" src="" alt="Selected image preview">
+          <div class="preview-info">
+            <p class="preview-name" id="preview-name">—</p>
+            <p class="preview-size" id="preview-size"></p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <button type="submit" class="btn btn-primary btn-full">Create account &rarr;</button>
+  </form>
+
+  <hr class="divider">
+  <p style="font-size:13px;text-align:center;color:var(--text-muted)">
+    Already have an account?
+    <a href="{% url 'login' %}">Sign in</a>
+  </p>
+
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+  /* ── Password visibility toggle ──────────────────────────────────── */
+  document.querySelectorAll('.pw-toggle').forEach(function(btn) {
+    btn.addEventListener('click', function() {
+      var inp = document.getElementById(this.dataset.target);
+      if (!inp) return;
+      inp.type = inp.type === 'password' ? 'text' : 'password';
+      this.setAttribute('aria-pressed', inp.type === 'text');
+    });
+  });
+
+  /* ── Drop-zone drag-over highlight ──────────────────────────────── */
+  var dz = document.getElementById('reg-drop-zone');
+  ['dragenter','dragover'].forEach(function(ev) {
+    dz.addEventListener(ev, function(e) { e.preventDefault(); dz.classList.add('drag-over'); });
+  });
+  ['dragleave','drop'].forEach(function(ev) {
+    dz.addEventListener(ev, function() { dz.classList.remove('drag-over'); });
+  });
+
+  /* ── Image file preview ──────────────────────────────────────────── */
+  document.getElementById('image_password').addEventListener('change', function() {
+    var file = this.files[0];
+    var container = document.getElementById('preview-container');
+    var img       = document.getElementById('preview-img');
+    var nameEl    = document.getElementById('preview-name');
+    var sizeEl    = document.getElementById('preview-size');
+
+    if (file) {
+      var reader = new FileReader();
+      reader.onload = function(e) {
+        img.src = e.target.result;
+        nameEl.textContent = file.name;
+        sizeEl.textContent = (file.size / 1024).toFixed(1) + ' KB';
+        container.style.display = 'block';
+        container.removeAttribute('aria-hidden');
+      };
+      reader.readAsDataURL(file);
+    } else {
+      container.style.display = 'none';
+      container.setAttribute('aria-hidden', 'true');
+      img.src = '';
+    }
+  });
+</script>
+{% endblock %}

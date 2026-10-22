@@ -1,0 +1,95 @@
+{% extends "base.html" %}
+{% block title %}Sign In — LayerLock{% endblock %}
+
+{% block content %}
+<div class="card">
+
+  <!-- Auth progress: Step 1 active, Steps 2 & 3 pending -->
+  <div class="auth-progress" aria-label="Authentication progress">
+    <div class="auth-step active">
+      <div class="auth-step-dot">1</div>
+      <div class="auth-step-label">Password</div>
+    </div>
+    <div class="auth-step">
+      <div class="auth-step-dot">2</div>
+      <div class="auth-step-label">RGB</div>
+    </div>
+    <div class="auth-step">
+      <div class="auth-step-dot">3</div>
+      <div class="auth-step-label">Image</div>
+    </div>
+  </div>
+
+  <span class="step-badge">Level 1 of 3</span>
+  <h1 class="page-title">Sign in</h1>
+  <p class="page-subtitle">Enter your email and password to begin authentication.</p>
+
+  {% if messages %}
+    {% for message in messages %}
+      <div class="alert alert-success" role="alert">
+        <span class="alert-icon">✓</span>
+        <span>{{ message }}</span>
+      </div>
+    {% endfor %}
+  {% endif %}
+
+  {% if error %}
+    <div class="alert alert-error" role="alert">
+      <span class="alert-icon">✕</span>
+      <span>{{ error }}</span>
+    </div>
+  {% endif %}
+
+  <form method="POST" novalidate>
+    {% csrf_token %}
+
+    <div class="form-group">
+      <label for="email">Email address</label>
+      <input
+        type="email" id="email" name="email"
+        autocomplete="email" required
+        placeholder="you@example.com"
+      >
+    </div>
+
+    <div class="form-group">
+      <label for="password">Password</label>
+      <div class="input-wrap">
+        <input
+          type="password" id="password" name="password"
+          autocomplete="current-password" required
+          placeholder="••••••••"
+          style="padding-right:44px"
+        >
+        <button
+          type="button" class="pw-toggle"
+          aria-label="Show or hide password"
+          data-target="password"
+        >&#x1F441;</button>
+      </div>
+    </div>
+
+    <button type="submit" class="btn btn-primary btn-full">Sign in &rarr;</button>
+  </form>
+
+  <hr class="divider">
+  <p style="font-size:13px;text-align:center;color:var(--text-muted)">
+    New here?
+    <a href="{% url 'register' %}">Create an account</a>
+  </p>
+
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+  document.querySelectorAll('.pw-toggle').forEach(function(btn) {
+    btn.addEventListener('click', function() {
+      var inp = document.getElementById(this.dataset.target);
+      if (!inp) return;
+      inp.type = inp.type === 'password' ? 'text' : 'password';
+      this.setAttribute('aria-pressed', inp.type === 'text');
+    });
+  });
+</script>
+{% endblock %}

@@ -1,0 +1,138 @@
+{% extends "base.html" %}
+{% block title %}Image Authentication — LayerLock{% endblock %}
+
+{% block content %}
+<div class="card">
+
+  <!-- Auth progress: Steps 1 & 2 done, Step 3 active -->
+  <div class="auth-progress" aria-label="Authentication progress">
+    <div class="auth-step done">
+      <div class="auth-step-dot">&#x2713;</div>
+      <div class="auth-step-label">Password</div>
+    </div>
+    <div class="auth-step done">
+      <div class="auth-step-dot">&#x2713;</div>
+      <div class="auth-step-label">RGB</div>
+    </div>
+    <div class="auth-step active">
+      <div class="auth-step-dot">3</div>
+      <div class="auth-step-label">Image</div>
+    </div>
+  </div>
+
+  <span class="step-badge">Level 3 of 3</span>
+  <h1 class="page-title">Image Authentication</h1>
+  <p class="page-subtitle">
+    Upload the same image you chose during registration.
+    The file is compared pixel-by-pixel against your stored key and is never saved.
+  </p>
+
+  {% if error %}
+    <div class="alert alert-error" role="alert">
+      <span class="alert-icon">✕</span>
+      <span>{{ error }}</span>
+    </div>
+  {% endif %}
+
+  {% if success %}
+    <div class="alert alert-success" role="alert">
+      <span class="alert-icon">&#x2713;</span>
+      <span>{{ success }}</span>
+    </div>
+  {% endif %}
+
+  <form method="POST" enctype="multipart/form-data" novalidate>
+    {% csrf_token %}
+
+    <div class="form-group">
+      <label for="image">Upload your image key</label>
+
+      <!-- Drop zone wraps the file input -->
+      <div class="drop-zone" id="img-drop-zone">
+        <input
+          type="file"
+          id="image"
+          name="image"
+          accept="image/*"
+          required
+          aria-describedby="img-hint"
+        >
+        <span class="drop-zone-icon" aria-hidden="true">&#x1F5BC;</span>
+        <p class="drop-zone-text">Drag &amp; drop your image here</p>
+        <p class="drop-zone-sub">or</p>
+        <span class="drop-zone-btn">Choose Image</span>
+      </div>
+
+      <p id="img-hint" class="field-hint">
+        JPEG, PNG, GIF, WebP, BMP &bull; max 5 MB &bull; only the pixel content is compared, not the filename.
+      </p>
+
+      <!-- Rich image preview (hidden until a file is chosen) -->
+      <div id="preview-container" class="preview-container" aria-hidden="true">
+        <div class="preview-inner">
+          <img id="preview-img" class="preview-img" src="" alt="Selected image preview">
+          <div class="preview-info">
+            <p class="preview-name" id="preview-name">—</p>
+            <p class="preview-size" id="preview-size"></p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <button type="submit" class="btn btn-primary btn-full">Verify Image &rarr;</button>
+  </form>
+
+  <hr class="divider">
+  <div class="alert alert-info" style="margin-bottom:0" role="note">
+    <span class="alert-icon">ℹ</span>
+    <span>
+      Upload the exact image you chose during registration.
+      Only the pixel content is compared — the filename does not matter.
+    </span>
+  </div>
+
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+  /* ── Drop-zone drag-over highlight ──────────────────────────────── */
+  var dz = document.getElementById('img-drop-zone');
+  ['dragenter', 'dragover'].forEach(function(ev) {
+    dz.addEventListener(ev, function(e) {
+      e.preventDefault();
+      dz.classList.add('drag-over');
+    });
+  });
+  ['dragleave', 'drop'].forEach(function(ev) {
+    dz.addEventListener(ev, function() {
+      dz.classList.remove('drag-over');
+    });
+  });
+
+  /* ── Image file preview ──────────────────────────────────────────── */
+  document.getElementById('image').addEventListener('change', function() {
+    var file      = this.files[0];
+    var container = document.getElementById('preview-container');
+    var img       = document.getElementById('preview-img');
+    var nameEl    = document.getElementById('preview-name');
+    var sizeEl    = document.getElementById('preview-size');
+
+    if (file) {
+      var reader = new FileReader();
+      reader.onload = function(e) {
+        img.src = e.target.result;
+        nameEl.textContent = file.name;
+        sizeEl.textContent = (file.size / 1024).toFixed(1) + ' KB';
+        container.style.display = 'block';
+        container.removeAttribute('aria-hidden');
+      };
+      reader.readAsDataURL(file);
+    } else {
+      container.style.display = 'none';
+      container.setAttribute('aria-hidden', 'true');
+      img.src = '';
+    }
+  });
+</script>
+{% endblock %}

@@ -1,0 +1,65 @@
+{% extends "base.html" %}
+{% block title %}RGB Authentication — LayerLock{% endblock %}
+
+{% block content %}
+<div class="card">
+
+  <!-- Auth progress: Step 1 done, Step 2 active, Step 3 pending -->
+  <div class="auth-progress" aria-label="Authentication progress">
+    <div class="auth-step done">
+      <div class="auth-step-dot">&#x2713;</div>
+      <div class="auth-step-label">Password</div>
+    </div>
+    <div class="auth-step active">
+      <div class="auth-step-dot">2</div>
+      <div class="auth-step-label">RGB</div>
+    </div>
+    <div class="auth-step">
+      <div class="auth-step-dot">3</div>
+      <div class="auth-step-label">Image</div>
+    </div>
+  </div>
+
+  <span class="step-badge">Level 2 of 3</span>
+  <h1 class="page-title">RGB Authentication</h1>
+  <p class="page-subtitle">
+    Enter the colour-based credential you set during registration.
+  </p>
+
+  {% if error %}
+    <div class="alert alert-error" role="alert">
+      <span class="alert-icon">✕</span>
+      <span>{{ error }}</span>
+    </div>
+  {% endif %}
+
+  <div class="rgb-hint-bar" aria-hidden="true"></div>
+
+  <form method="POST" novalidate>
+    {% csrf_token %}
+
+    <div class="form-group">
+      <label for="rgb_password">RGB Password</label>
+      <input
+        type="text" id="rgb_password" name="rgb_password"
+        autocomplete="off"
+        placeholder="e.g. 255,0,128, #FF0080, or purple"
+        required
+        autofocus
+      >
+    </div>
+
+    <button type="submit" class="btn btn-primary btn-full">Verify &rarr;</button>
+  </form>
+
+  <hr class="divider">
+  <div class="alert alert-info" style="margin-bottom:0" role="note">
+    <span class="alert-icon">ℹ</span>
+    <span>
+      Enter the exact RGB password you saved during registration.
+      Completing this step takes you to the final image authentication stage.
+    </span>
+  </div>
+
+</div>
+{% endblock %}

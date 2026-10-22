@@ -1,0 +1,171 @@
+{% extends "base.html" %}
+{% block title %}Dashboard — LayerLock{% endblock %}
+
+{% block extra_head %}
+<style>
+  /* ── Dashboard-specific styles ─────────────────────────────────── */
+  .dash-section-title {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    margin-bottom: 14px;
+  }
+
+  /* Auth summary tiles */
+  .dash-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+    margin-bottom: 28px;
+  }
+  .dash-tile {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 18px 16px 14px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+  .dash-tile::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+    background: var(--success);
+    opacity: .7;
+  }
+  .dash-tile-check {
+    font-size: 20px;
+    color: var(--success);
+    margin-bottom: 6px;
+    display: block;
+  }
+  .dash-tile-label {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: .8px;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    margin-bottom: 3px;
+  }
+  .dash-tile-note {
+    font-size: 11.5px;
+    color: var(--text-dim);
+  }
+
+  /* Session info row */
+  .session-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 16px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    margin-bottom: 10px;
+    font-size: 13px;
+  }
+  .session-row-icon {
+    font-size: 16px;
+    flex-shrink: 0;
+    color: var(--text-muted);
+  }
+  .session-row-label {
+    color: var(--text-muted);
+    min-width: 80px;
+    font-weight: 600;
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: .4px;
+  }
+  .session-row-value {
+    color: var(--text);
+    flex: 1;
+  }
+
+  @media (max-width: 480px) {
+    .dash-grid { grid-template-columns: repeat(3, 1fr); gap: 8px; }
+    .dash-tile  { padding: 14px 8px 12px; }
+    .dash-tile-note { font-size: 10px; }
+    .session-row { flex-direction: column; align-items: flex-start; gap: 4px; }
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="card card-wide">
+
+  <!-- Auth progress — all 3 done -->
+  <div class="auth-progress" aria-label="Authentication progress">
+    <div class="auth-step done">
+      <div class="auth-step-dot">&#x2713;</div>
+      <div class="auth-step-label">Password</div>
+    </div>
+    <div class="auth-step done">
+      <div class="auth-step-dot">&#x2713;</div>
+      <div class="auth-step-label">RGB</div>
+    </div>
+    <div class="auth-step done">
+      <div class="auth-step-dot">&#x2713;</div>
+      <div class="auth-step-label">Image</div>
+    </div>
+  </div>
+
+  <span class="step-badge">&#x2713; Authenticated</span>
+  <h1 class="page-title">Welcome, {{ username }}!</h1>
+  <p class="page-subtitle">
+    All three authentication levels passed. You are now fully signed in.
+  </p>
+
+  <div class="alert alert-success" role="status">
+    <span class="alert-icon">&#x2713;</span>
+    <span>Three-level authentication complete. Session is active.</span>
+  </div>
+
+  <hr class="divider">
+
+  <!-- Authentication summary -->
+  <p class="dash-section-title">Authentication Summary</p>
+  <div class="dash-grid">
+    <div class="dash-tile">
+      <span class="dash-tile-check">&#x2713;</span>
+      <p class="dash-tile-label">Level 1</p>
+      <p class="dash-tile-note">Password</p>
+    </div>
+    <div class="dash-tile">
+      <span class="dash-tile-check">&#x2713;</span>
+      <p class="dash-tile-label">Level 2</p>
+      <p class="dash-tile-note">RGB Secret</p>
+    </div>
+    <div class="dash-tile">
+      <span class="dash-tile-check">&#x2713;</span>
+      <p class="dash-tile-label">Level 3</p>
+      <p class="dash-tile-note">Image Key</p>
+    </div>
+  </div>
+
+  <!-- Session info -->
+  <p class="dash-section-title">Session Info</p>
+
+  <div class="session-row">
+    <span class="session-row-icon">&#x1F464;</span>
+    <span class="session-row-label">User</span>
+    <span class="session-row-value">{{ username }}</span>
+  </div>
+  <div class="session-row">
+    <span class="session-row-icon">&#x1F510;</span>
+    <span class="session-row-label">Status</span>
+    <span class="session-row-value" style="color:var(--success)">Fully authenticated (all 3 levels)</span>
+  </div>
+
+  <hr class="divider">
+
+  <div style="display:flex;gap:12px;flex-wrap:wrap">
+    <a href="{% url 'logout' %}" class="btn btn-ghost">Sign out</a>
+  </div>
+
+</div>
+{% endblock %}
